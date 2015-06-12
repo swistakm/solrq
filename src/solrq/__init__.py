@@ -49,7 +49,7 @@ class Value(object):
         if isinstance(raw, datetime) and not safe:
             # Note: solr speaks ISO, wrap it with quotes to avoid further
             # escaping
-            self.raw = '"{}"'.format(raw.isoformat())
+            self.raw = '"{dt}"'.format(dt=raw.isoformat())
             # since we translated value we can safely mark it safe
             self.safe = True
         elif isinstance(raw, timedelta) and not safe:
@@ -196,7 +196,7 @@ class QOperator(object):
             raise ValueError(
                 "<invert> operator can receive only single Q object as operand"
             )
-        return "!{}".format(qs_list[0])
+        return "!{qs}".format(qs=qs_list[0])
 
     @classmethod
     def boost(cls, qs_list, factor):
@@ -224,7 +224,7 @@ class QOperator(object):
                 "boost factor must be either int or float"
             )
 
-        return "{}^{}".format(qs_list[0], factor)
+        return "{qs}^{factor}".format(qs=qs_list[0], factor=factor)
 
 
 class Q(object):
@@ -276,15 +276,15 @@ class Q(object):
         """
         if kwargs and children:
             raise ValueError(
-                "{} object can be instantiated only with qeury tuple or"
+                "{cls} object can be instantiated only with qeury tuple or"
                 "iterable of children but not with both".format(
-                    self.__class__.__name__
+                    cls=self.__class__.__name__
                 )
             )
 
         elif kwargs and len(kwargs) == 1:
             # the simpliest case: one term Q object
-            self.term, self.query = kwargs.popitem()
+            self.field, self.query = kwargs.popitem()
 
             if not isinstance(self.query, Value):
                 self.query = Value(self.query)
@@ -384,9 +384,9 @@ class Q(object):
         :return: compiled query string
         """
         if not self._children:
-            query_string = "{}:{}".format(
-                self.term,
-                self.query
+            query_string = "{field}:{qs}".format(
+                field=self.field,
+                qs=self.query
             )
         else:
             query_string = self._operator([
@@ -396,7 +396,7 @@ class Q(object):
             ])
 
             if extra_parenthesis:
-                query_string = "({})".format(query_string)
+                query_string = "({qs})".format(qs=query_string)
 
         return query_string
 

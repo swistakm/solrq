@@ -104,7 +104,7 @@ def test_value():
 
 def test_value_datetimes():
     dt = datetime.now()
-    assert str(Value(dt)) == '"{}"'.format(dt.isoformat())
+    assert str(Value(dt)) == '"{dt}"'.format(dt=dt.isoformat())
 
 
 def test_value_timedelta():
@@ -137,7 +137,7 @@ def test_range():
         Range(td_from, td_to)
     ) == str(
         Range(Value(td_from), Value(td_to))
-    ) == "[{} TO {}]".format(Value(td_from), Value(td_to))
+    ) == "[{from_} TO {to}]".format(from_=Value(td_from), to=Value(td_to))
 
     # note: if marked as safe then each range sub-element will force-marked
     # as safe
@@ -145,7 +145,7 @@ def test_range():
         Range(td_from, td_to, safe=True)
     ) == str(
         Range(Value(td_from, safe=True), Value(td_to, safe=True))
-    ) == "[{} TO {}]".format(td_from, td_to)
+    ) == "[{from_} TO {to}]".format(from_=td_from, to=td_to)
 
 
 def test_special():
