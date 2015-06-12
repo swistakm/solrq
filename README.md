@@ -120,6 +120,14 @@ Simply as:
     >>> Q(delta=timedelta(days=1))
     <Q: delta:NOW+1DAYS+0SECONDS+0MILLISECONDS>
     
+### field wildcard
+
+If you need to use wildcards in field names just pass use dict and unpack it
+instead of using keyword arguments:
+
+    >>> Q(**{"*_t": "text_to_search"})
+    <Q: *_t:text_to_search>
+
 
 # contributing
 
