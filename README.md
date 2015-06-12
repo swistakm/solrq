@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/swistakm/solrq.svg?branch=master)](https://travis-ci.org/swistakm/solrq)
+[![Coverage Status](https://coveralls.io/repos/swistakm/solrq/badge.svg)](https://coveralls.io/r/swistakm/solrq)
+
 # solrq
 Python Solr query utility. It helps making query strings for Solr more 
 'pythonicaly' and also helps with escaping reserved characters.
