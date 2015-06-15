@@ -22,8 +22,8 @@ feed it with bunch of field and search terms to see how it works:
     <Q: type:animal AND species:dog>
     
     >>> # ohh, forgot about cats?
-    >>> query & Q(type="animal", species="dog")
-    <Q: (type:animal AND species:dog) AND (type:animal AND species:dog)>
+    >>> query & Q(type="animal", species="cat")
+    <Q: (type:animal AND species:dog) AND (type:animal AND species:cat)>
     
     >>># more a cat lover? Let's give them a boost boost
     >>> Q(type="animal") & (Q(species="cat")^2 | Q(species="dog"))
@@ -151,7 +151,7 @@ their history rewritten just drives me crazy.
 
 Tests are run using tox. Simply install it and run:
 
-    pip install
+    pip install tox
     tox
     
 And that's all.
