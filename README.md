@@ -2,8 +2,8 @@
 [![Coverage Status](https://coveralls.io/repos/swistakm/solrq/badge.svg)](https://coveralls.io/r/swistakm/solrq)
 
 # solrq
-Python Solr query utility. It helps making query strings for Solr more 
-'pythonicaly' and also helps with escaping reserved characters.
+`solr` is a Python Solr query utility. It helps making query strings for Solr
+and also helps with escaping reserved characters.
 
     pip install solrq
     
@@ -11,7 +11,7 @@ And you're ready to go!
 
 # usage
 
-Everything in `solrq` is about `Q` object. Drop into python repl and just
+Everything in `solrq` is about `Q()` object. Drop into python repl and just
 feed it with bunch of field and search terms to see how it works:
 
     >>> from solrq import Q
@@ -31,9 +31,11 @@ feed it with bunch of field and search terms to see how it works:
 
 But what to do with this `Q`? Simply pass it to your Solr library of choice, 
 like [pysolr](https://github.com/toastdriven/pysolr) or 
-[mysolr](https://github.com/RedTuna/mysolr). Most of them just expect simple
-string as a query parameter or even can't help with escaping. This is why
-`solrq` integrates so easily. See how it looks like for pysolr:
+[mysolr](https://github.com/RedTuna/mysolr). Most of python Solr libraries
+expect simple string as a query parameter and do not bother with escaping
+of reserved characters so you must take care of that by yourself. This is why
+`solrq` integrates so easily. Here is an example how you can use it with 
+[pysolr](https://github.com/toastdriven/pysolr):
 
     from solrq import Q
     import pysolr
@@ -91,7 +93,7 @@ Use `solrq.Range` wrapper:
     <Q: age:[18 TO 25]>
 
 
-### proximity search
+### proximity searches
 
 Use `solrq.Proximity` wrapper:
 
@@ -101,9 +103,10 @@ Use `solrq.Proximity` wrapper:
 
 ### safe strings
 
-All raw string values are treated as unsafe and will be escaped to ensure that 
-final query string will not be broken by some rougue search value this of 
-course can be disabled if you know what you're doing using `Value` wrapper:
+All raw string values are treated as unsafe by default and will be escaped to 
+ensure that final query string will not be broken by some rougue search value.
+This of course can be disabled if you know what you're doing using
+`Value` wrapper:
 
     >>> from solrq import Q, Value
     >>> Q(type='foo bar[]')
@@ -125,8 +128,8 @@ Simply as:
     
 ### field wildcard
 
-If you need to use wildcards in field names just pass use dict and unpack it
-instead of using keyword arguments:
+If you need to use wildcards in field names just use dict and unpack it inside
+of `Q()` instead of using keyword arguments:
 
     >>> Q(**{"*_t": "text_to_search"})
     <Q: *_t:text_to_search>
@@ -135,13 +138,13 @@ instead of using keyword arguments:
 # contributing
 
 Any contribution is welcome. Issues, suggestions, pull requests - whatever. 
-There are no strict contribution guidelines beyond PEP-8
-and sanity. Code style is checked with flakes8 and any PR that has failed build
+There are no strict contribution guidelines beyond PEP-8 and sanity. 
+Code style is checked with flakes8 and any PR that has failed build
 will not be merged.
 
-And one last thing: if you submit a PR please do not rebase it later unless you
-are not asked for that. Reviewing pull requests that suddenly had their history
-rewritten just drives me crazy.
+One thing: if you submit a PR please do not rebase it later unless you
+are asked for that explicitely. Reviewing pull requests that suddenly had 
+their history rewritten just drives me crazy.
 
 # testing
 
