@@ -13,24 +13,43 @@ class Value(object):
     extensions query value translations.
 
     By default escapes all restricted characters so query can not be easily
-    breaken with unsafe strings. Also it recognizes `timedelta` and
-    `datetime` objects so they can be represented in format that Solr can
+    broken with unsafe strings. Also it recognizes ``timedelta`` and
+    ``datetime`` objects so they can be represented in format that Solr can
     recognize (useful with ranges, see: `Range`)
 
-    Example usage:
+    Args:
+        raw (object): raw value object. Must be string, datetime, timedelta
+                      or have ``__str__`` method defined.
 
-        >>> Value("foo bar")           # in most cases it will be str
-        <Value: foo\\ bar>
-        >>> Value(1)                   # but can be anything that has __str__
-        <Value: 1>
-        >>> Value(timedelta(days=1))   # like timedelta or  datetime
-        <Value: NOW+2DAYS+0SECONDS+0MILLISECONDS>
-        >>> str(Value("foo bar"))      # just make it str to get a query string
-        'foo\ bar'
-        >>> Value('foo [] bar')        # not safe by default
-        <Value: foo\ \[\]\ bar>
-        >>> Value("not [safe]", True)  # but escaping can be turned off
-        <Value: not [safe]>
+        safe (bool): set to True to turn off character escaping
+
+    Examples:
+
+        In most cases you will pass string:
+
+            >>> Value("foo bar")
+            <Value: foo\\ bar>
+
+        But it can be anything that has ``__str__`` method:
+
+            >>> Value(1)
+            <Value: 1>
+            >>> Value(timedelta(days=1))
+            <Value: NOW+1DAYS+0SECONDS+0MILLISECONDS>
+            >>> Value(Value("foo"))
+            <Value: foo>
+
+        To get final query string just make it ``str``:
+
+            >>> str(Value("foo bar"))
+            'foo\\\\ bar'
+
+        Note that raw strings are not safe by default:
+
+            >>> Value('foo [] bar')
+            <Value: foo\ \[\]\ bar>
+            >>> Value("foo [] bar", safe=True)
+            <Value: foo [] bar>
 
     """
     # note: since we escape spaces there is no need to escape AND, OR, NOT
@@ -39,12 +58,9 @@ class Value(object):
 
     def __init__(self, raw, safe=False):
         """
-        Initialize Value object and if `datetime` or `timedelta` is passed
-        as `raw` then immediately convert it to value that can be parsed by
-        Solr.
-
-        :param raw: raw value object. Must have __str__ method defined
-        :param safe: set to True to turn off character escaping
+        Initialize Value object and if ``datetime`` or ``timedelta`` is
+        passed as ``raw`` then immediately convert it to value that can be
+        parsed by Solr.
         """
         if isinstance(raw, datetime) and not safe:
             # Note: solr speaks ISO, wrap it with quotes to avoid further
@@ -74,6 +90,12 @@ class Value(object):
 
     @classmethod
     def _escape(cls, string):
+        """
+        Escape given string using ``Value.ESCAPE_RE`` expression.
+
+        Args:
+            string (str): string to escape
+        """
         return cls.ESCAPE_RE.sub(r'\\\g<char>', string)
 
     def __str__(self):
@@ -89,21 +111,43 @@ class Value(object):
 class Range(Value):
     """
     Wrapper around range values. Wraps two values with Solr's
-    '[<from> TO <to>]' syntax with respect to restricted character esaping.
+    ``[<from> TO <to>]`` syntax with respect to restricted character esaping.
 
-    Example usage:
+    Args:
 
-        >>> Range('*', '*', safe=True)  # equiv: `Range(ANY, ANY)` or `SET`
-        <Range: [* TO *]>
-        >>> Range(0, 10)
-        <Range: [0 TO 20]>
-        >>> Range(timedelta(days=2), timedelta())
-        <Range: [NOW+2DAYS+0SECONDS+0MILLISECONDS TO NOW]>
+        from_ (object): start of range, same as parameter ``raw`` in
+            :class:`Value`.
+
+        to (object): end of range, same as parameter ``raw`` in :class:`Value`.
+
+    Examples:
 
 
-    Note: We could treat any iterables always as ranges when initializing Q
-    objects but "explicit is better than implicit" and also this would require
-    to handle value representation there and we don't want to do that.
+        Simpliest range that matches all documents with some field set:
+
+            >>> Range('*', '*', safe=True)
+            <Range: [* TO *]>
+
+        Note that there are shortucts already provided:
+
+            >>> Range(ANY, ANY)
+            <Range: [* TO *]>
+            >>> SET
+            <Range: [* TO *]>
+
+        Other data types:
+
+            >>> Range(0, 20)
+            <Range: [0 TO 20]>
+            >>> Range(timedelta(days=2), timedelta())
+            <Range: [NOW+2DAYS+0SECONDS+0MILLISECONDS TO NOW]>
+
+    Note:
+
+        We could treat any iterables always as ranges when initializing
+        :class:`Q` objects but "explicit is better than implicit" and also
+        this would require to handle value representation there and we don't
+        want to do that.
 
     """
     def __init__(self, from_, to, safe=None):
@@ -130,12 +174,23 @@ class Proximity(Value):
     """
     Wrapper for proximity searches.
 
-    Example usage:
+    Args:
 
-        >>> Proximity('foo bar', 4)        # 'foo' and 'bar' with distance of 4
+        raw (str): string of words for proximity search
+
+    Examples:
+
+        >>> Proximity('foo bar', 4)
         <Proximity: "foo\ bar"~4>
-        >>> Proximity('foo bar', 4, True)  # without escaping
+        >>> Proximity('foo bar', 4, True)
         <Proximity: "foo bar"~4>
+
+    Note:
+
+        :class:`Proximity` will in fact accept any type as raw value that has
+        ``__str__`` method defined so it is developer's responsibility to
+        make sure that ``raw`` has a reasonable value.
+
     """
     def __init__(self, raw, distance, safe=False):
         self.distance = distance
@@ -162,9 +217,13 @@ class QOperator(object):
         """
         Perform 'and' operator routine
 
-        :param qs_list: list of "compiled" query strings
-        :return: query strings joined with Solr 'AND' operator as single
-            string
+        Args:
+
+            qs_list (iterable): iterable of "compiled" query strings
+
+        Returns:
+
+            str: query strings joined with Solr `AND` operator as single string
         """
         return " AND ".join(qs_list)
 
@@ -173,9 +232,13 @@ class QOperator(object):
         """
         Perform 'or' operator routine
 
-        :param qs_list: list of "compiled" query strings
-        :return: query strings joined with Solr 'AND' operator as single
-            string
+        Args:
+
+            qs_list (iterable): iterable of "compiled" query strings
+
+         Returns:
+
+            str: query strings joined with Solr `OR` operator as single string
         """
 
         return " OR ".join(qs_list)
@@ -185,12 +248,22 @@ class QOperator(object):
         """
         Perform 'not' operator routine
 
-        Note: `qs_list` must be a list despite 'not' operator accepts only
-        single query string here, to avoid more complexity in `Q` objects
-        initialization.
+        Args:
 
-        :param qs_list: single element list with compiled query string
-        :return: Solr 'NOT' operator followed with given query string
+            qs_list (iterable): single item iterable of "compiled" query
+                strings
+
+        Returns:
+
+           str: string with containing Solr ``!`` operator followed by query
+               string
+
+        Note:
+
+            ``qs_list`` must be a list despite 'not' operator accepts only
+            single query string here, to avoid more complexity in :class:`Q`
+            objects
+            initialization.
         """
         if len(qs_list) != 1:
             raise ValueError(
@@ -203,17 +276,27 @@ class QOperator(object):
         """
         Perform 'boost' operator routine
 
-        Note: this operator routine is not intended to be directly used as
-        `Q` object argument but rather as component for actual operator e.g:
+        Args:
 
-            >>> from functools import partial
-            >>> Q(children=[Q(a='b')], op=partial(QOperator.boost, factor=2))
-            <Q: a:b^2>
+            qs_list (iterable): single element list with compiled query string
 
-        :param qs_list: single element list with compiled query string
-        :param factor: boost factor
-        :return: compiled query string followed with '~' and boost factor
-        """
+            factor (float or int): boost factor
+
+        Returns:
+
+            str: compiled query string followed with '~' and boost factor
+
+
+        Note:
+            this operator routine is not intended to be directly used as
+            :class:`Q` object argument but rather as a component for actual
+            operator e.g:
+
+                >>> from functools import partial
+                >>> Q(children=[Q(a='b')], op=partial(QOperator.boost, factor=2))
+                <Q: a:b^2>
+
+        """  # noqa
         if len(qs_list) != 1:
             raise ValueError(
                 "<boost> operator can receive only single Q object"
@@ -231,24 +314,39 @@ class Q(object):
     """
     Class for handling Solr queries in semantic way.
 
-    Example usage:
+    Args:
+
+        children (iterable): iterable of children Q objects. **Note**: can't
+            be used with kwargs
+
+        op (callable): operator to join query parts
+
+        kwargs (dict): list of query parts. Note: can't be used with children
+
+    Examples:
 
         >>> Q(foo="bar")
         <Q: foo:bar>
         >>> str(Q(foo="bar"))
         'foo:bar'
 
-        >>> q = Q(text="Skyrim")
+        >>> Q(text="Skyrim")
         <Q: text:Skyrim>
 
-        >>> q = Q(language="EN", text="Skyrim")
-        <Q: language:EN AND text:Skyrim>
+        >>> Q(language="EN", text="Skyrim") # doctest: +ELLIPSIS
+        <Q: ...>
 
-        >>> q = ~(Q(language="EN", text="cat") | Q(language="PL", text="dog"))
-        <Q: !((language:EN AND text:cat) OR (language:PL AND text:dog))>
+        >>> ~(Q(language="EN", text="cat") | Q(language="PL", text="dog"))
+        <Q: !((... AND ...) OR (... AND ...))>
 
 
-    Note: only little magic inside (tm)
+    Note:
+
+        it is possible to specify query params that are not valid python
+        argument names using dictionary unpacking e.g.:
+
+            >>> Q(**{"*_t": "text_to_search"})
+            <Q: *_t:text_to_search>
     """
     _children = None
     _op = None
@@ -260,19 +358,8 @@ class Q(object):
             **kwargs
     ):
         """
-        Initialize Q object using set (iterable) of children or query
-        params specified as Q.
-
-        Note: it is possible to specify query params that are not valid
-        python parameter names using dictionary unpacking e.g.:
-
-            >>> Q(**{"*_t": "text_to_search"})
-
-        :param children: list of children Q objects. Note: can't be used
-            with kwargs
-        :param op: operator to join query parts
-        :param kwargs: list of query parts. Note: can't be used with children
-        :return:
+        Initialize Q object using iterable of children or query
+        params specified as keyword arguments.
         """
         if kwargs and children:
             raise ValueError(
@@ -304,48 +391,65 @@ class Q(object):
 
     def __and__(self, other):
         """
-        Build complex query using Solr 'AND' operator.
+        Build complex query using Solr ``AND`` operator.
 
-        Example usage:
+        Args:
+
+            other: right-hand operand
+
+        Returns:
+
+            Q: object representing Solr ``AND`` operator query
+
+        Examples:
 
             >>> Q(type="animal") & Q(name="cat")
             <Q: type:animal AND name:cat>
-
-        :param other: right operand
-        :return: `Q` object representing Solr 'AND' operator
         """
         return Q(children=[self, other], op=QOperator.and_)
 
     def __or__(self, other):
         """
-        Build complex query using Solr 'OR' operator.
+        Build complex query using Solr ``OR`` operator.
 
-        Example usage:
+        Args:
+
+            other: right-hand operand
+
+        Returns:
+
+            Q: object representing Solr ``OR`` operator query
+
+        Examples:
 
             >>> Q(type="animal") | Q(name="cat")
             <Q: type:animal OR name:cat>
 
-        :param other: right operand
-        :return: `Q` object representing Solr 'OR' operator
         """
         return Q(children=[self, other], op=QOperator.or_)
 
     def __invert__(self):
         """
-        Build complex query using Solr '!1' operator.
+        Build complex query using Solr ``!`` operator.
 
-        Example usage:
+        Returns:
+
+            Q: object representing Solr ``!`` operator query
+
+        Examples:
 
             >>> ~Q(type="animal")
             <Q: !type:animal>
 
-        Note: we use here a '~' operator because it seems to fit best
-        semanticaly to boolean 'not' operation. Despite Solr uses same
-        character proximity searches ('~') there is no place for confusion
-        because __invert__ in python accepts only one operand. For proximity
-        searches there is a `Proximity` class provided.
+        Note:
 
-        :return: `Q` object representing Solr 'NOT' operator
+            We use here a ``~`` operator because it seems to fit best
+            semanticaly to boolean 'not' operation. Despite Solr uses same
+            character proximity searches (``~``) there is no place for
+            confusion because ``__invert__`` in python accepts only one
+            operand. For proximity searches there is a :class:`Proximity`
+            class provided.
+
         """
         return Q(children=[self], op=QOperator.not_)
 
@@ -353,14 +457,19 @@ class Q(object):
         """
         Build complex query using Solr boost operator.
 
-        Example usage:
+        Args:
 
-            >>> ~Q(type="animal")
-            <Q: !type:animal>
+            other (float or int): boost value
 
-        :return: `Q` object representing Solr query boosted by a given factor
-        :param other: boost factor value
-        :return:
+        Returns:
+
+            Q: object representing Solr query boosted by a given factor
+
+        Examples:
+
+            >>> Q(type="animal") ^ 2
+            <Q: type:animal^2>
+
         """
 
         return Q(
@@ -370,18 +479,22 @@ class Q(object):
 
     def compile(self, extra_parenthesis=False):
         """
-        Compile `Q` object into query string
+        Compile :class:`Q` object into query string
 
-        Example usage:
+        Args:
+
+            extra_parenthesis (bool): add extra parenthesis to children query.
+
+        Returns:
+
+            str: compiled query string
+
+        Examples:
 
             >>> (Q(type="animal") & Q(name="cat")).compile()
             'type:animal AND name:cat'
             >>> (Q(type="animal") & Q(name="cat")).compile(True)
             '(type:animal AND name:cat)'
-
-        :param extra_parenthesis: add extra parenthesis children children
-          query.
-        :return: compiled query string
         """
         if not self._children:
             query_string = "{field}:{qs}".format(
@@ -401,6 +514,15 @@ class Q(object):
         return query_string
 
     def __str__(self):
+        """
+        String representation of :class:`Q` object (See :func:`Q.compile`)
+
+        Returns:
+
+            str: compiled query string
+
+
+        """
         return self.compile()
 
     def __repr__(self):
