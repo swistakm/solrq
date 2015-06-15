@@ -19,6 +19,10 @@ import shlex
 # import solrq in order to retrieve version info
 import solrq
 
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if on_rtd:
+    from convert_readme import convert_md
+    convert_md()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
