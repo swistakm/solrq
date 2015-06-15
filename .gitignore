@@ -50,8 +50,17 @@ coverage.xml
 # Django stuff:
 *.log
 
-# Sphinx documentation
-docs/_build/
-
 # PyBuilder
 target/
+
+
+# local coveralls config
+.coveralls.yml
+
+# generated documentation
+docs/_build
+docs/_static
+docs/readme.rst
+
+# system dependent
+.DS_Store

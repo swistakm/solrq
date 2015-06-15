@@ -51,7 +51,7 @@ of reserved characters so you must take care of that by yourself. This is why
     
 ## quick reference
 
-Full reference can be found in package documentation but here is a short
+Full reference can be found in API reference documentation but here is a short
 reference.
 
 ### boosting queries
