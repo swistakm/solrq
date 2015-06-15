@@ -19,8 +19,11 @@ import shlex
 # import solrq in order to retrieve version info
 import solrq
 
+# this is quite dirty approach but we're not working at NASA and nobody can die
+# because of that. Am I right?
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from convert_readme import convert_md
     convert_md()
 
