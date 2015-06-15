@@ -15,20 +15,21 @@ And you're ready to go!
 Everything in `solrq` is about `Q()` object. Drop into python repl and just
 feed it with bunch of field and search terms to see how it works:
 
-    >>> from solrq import Q
-    >>> # note: all terms in single Q object are implicitely joined with 'AND'
-    >>> query = Q(type="animal", species="dog")
-    >>> query
-    <Q: type:animal AND species:dog>
-    
-    >>> # ohh, forgot about cats?
-    >>> query | Q(type="animal", species="cat")
-    <Q: (type:animal AND species:dog) OR (type:animal AND species:cat)>
-    
-    >>># more a cat lover? Let's give them a boost boost
-    >>> Q(type="animal") & (Q(species="cat")^2 | Q(species="dog"))
-    <Q: type:animal AND ((species:cat^2) OR species:dog)>
+```python
+>>> from solrq import Q
+>>> # note: all terms in single Q object are implicitely joined with 'AND'
+>>> query = Q(type="animal", species="dog")
+>>> query
+<Q: type:animal AND species:dog>
 
+>>> # ohh, forgot about cats?
+>>> query | Q(type="animal", species="cat")
+<Q: (type:animal AND species:dog) OR (type:animal AND species:cat)>
+
+>>># more a cat lover? Let's give them a boost boost
+>>> Q(type="animal") & (Q(species="cat")^2 | Q(species="dog"))
+<Q: type:animal AND ((species:cat^2) OR species:dog)>
+```
 
 But what to do with this `Q`? Simply pass it to your Solr library of choice, 
 like [pysolr](https://github.com/toastdriven/pysolr) or 
@@ -38,17 +39,18 @@ of reserved characters so you must take care of that by yourself. This is why
 `solrq` integrates so easily. Here is an example how you can use it with 
 [pysolr](https://github.com/toastdriven/pysolr):
 
-    from solrq import Q
-    import pysolr
-    
-    solr = Solr("<your solr url>")
-    
-    # simply using Q object
-    solr.search(Q(text="easy as f***"))
+```python
+from solrq import Q
+import pysolr
 
-    # or explicitely making it string
-    solr.search(str(Q(text="easy as f***")))
-    
+solr = Solr("<your solr url>")
+
+# simply using Q object
+solr.search(Q(text="easy as f***"))
+
+# or explicitely making it string
+solr.search(str(Q(text="easy as f***")))
+```
     
 ## quick reference
 
@@ -59,48 +61,57 @@ but here is a short reference.
 
 Use python `^` operator:
 
-    >>> Q(text='cat') ^ 2
-    <Q: text:cat^2>
-
+```python
+>>> Q(text='cat') ^ 2
+<Q: text:cat^2>
+```
 
 ### AND queries
 
 Use python `&` operator:
 
-    >>> Q(text='cat') & Q(text='dog')
-    <Q: text:cat AND text:dog>
+```python
+>>> Q(text='cat') & Q(text='dog')
+<Q: text:cat AND text:dog>
+```
 
 ### OR queries
 
 Use python `|` operator:
 
-    >>> Q(text='cat') | Q(text='dog')
-    <Q: text:cat AND text:dog>
-    
+```python
+>>> Q(text='cat') | Q(text='dog')
+<Q: text:cat OR text:dog>
+```
 
 ### NOT queries
 
 Use python `~` operator:
 
-    >>> ~ Q(text='cat')
-    <Q: !text:cat>
+```python
+>>> ~ Q(text='cat')
+<Q: !text:cat>
+```
     
-### ranges:
+### ranges
 
 Use `solrq.Range` wrapper:
 
-    >>> from solrq import Range
-    >>> Q(age=Range(18, 25))
-    <Q: age:[18 TO 25]>
-
+```python
+>>> from solrq import Range
+>>> Q(age=Range(18, 25))
+<Q: age:[18 TO 25]>
+```
 
 ### proximity searches
 
 Use `solrq.Proximity` wrapper:
 
-    >>> from solrq import Proximity
-    >>> Q(age=Proximity("cat dogs", 5))
-    <Q: age:"cat\ dogs"~5>
+```python
+>>> from solrq import Proximity
+>>> Q(age=Proximity("cat dogs", 5))
+<Q: age:"cat\ dogs"~5>
+```
 
 ### safe strings
 
@@ -109,32 +120,36 @@ ensure that final query string will not be broken by some rougue search value.
 This of course can be disabled if you know what you're doing using
 `Value` wrapper:
 
-    >>> from solrq import Q, Value
-    >>> Q(type='foo bar[]')
-    <Q: type:foo\ bar\[\]>
-    >>> Q(type=Value('foo bar[]', safe=True))
-    <Q: type:foo bar[]>
-    
-    
+```python
+>>> from solrq import Q, Value
+>>> Q(type='foo bar[]')
+<Q: type:foo\ bar\[\]>
+>>> Q(type=Value('foo bar[]', safe=True))
+<Q: type:foo bar[]>
+```
+
 ### timedeltas, datetimes
 
 Simply as:
 
-    >>> from datetime import datetime, timedelta
-    >>> Q(date=datetime(1970, 1, 1))
-    <Q: date:"1970-01-01T00:00:00">
-    >>> # note that timedeltas has any sense mostly with ranges
-    >>> Q(delta=timedelta(days=1))
-    <Q: delta:NOW+1DAYS+0SECONDS+0MILLISECONDS>
-    
+```python
+>>> from datetime import datetime, timedelta
+>>> Q(date=datetime(1970, 1, 1))
+<Q: date:"1970-01-01T00:00:00">
+>>> # note that timedeltas has any sense mostly with ranges
+>>> Q(delta=timedelta(days=1))
+<Q: delta:NOW+1DAYS+0SECONDS+0MILLISECONDS>
+```
+
 ### field wildcard
 
 If you need to use wildcards in field names just use dict and unpack it inside
 of `Q()` instead of using keyword arguments:
 
+```python
     >>> Q(**{"*_t": "text_to_search"})
     <Q: *_t:text_to_search>
-
+```
 
 # contributing
 
