@@ -7,11 +7,6 @@ def strip_comments(l):
     return l.split('#', 1)[0].strip()
 
 
-def reqs(*f):
-    return list(filter(None, [strip_comments(l) for l in open(
-        os.path.join(os.getcwd(), *f)).readlines()]))
-
-
 def get_version(version_tuple):
     if not isinstance(version_tuple[-1], int):
         return '.'.join(map(str, version_tuple[:-1])) + version_tuple[-1]
@@ -22,7 +17,7 @@ init = os.path.join(os.path.dirname(__file__), 'src', 'solrq', '__init__.py')
 version_line = list(filter(lambda l: l.startswith('VERSION'), open(init)))[0]
 VERSION = get_version(eval(version_line.split('=')[-1]))
 
-INSTALL_REQUIRES = reqs('requirements.txt')
+INSTALL_REQUIRES = []
 
 try:
     from pypandoc import convert
@@ -31,6 +26,7 @@ try:
         return convert(f, 'rst')
 
 except ImportError:
+    convert = None
     print(
         "warning: pypandoc module not found, could not convert Markdown to RST"
     )
