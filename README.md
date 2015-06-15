@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/swistakm/solrq.svg?branch=master)](https://travis-ci.org/swistakm/solrq)
 [![Coverage Status](https://coveralls.io/repos/swistakm/solrq/badge.svg)](https://coveralls.io/r/swistakm/solrq)
+[![Documentation Status](https://readthedocs.org/projects/solrq/badge/?version=latest)](https://readthedocs.org/projects/solrq/?badge=latest)
 
 # solrq
 `solr` is a Python Solr query utility. It helps making query strings for Solr
@@ -51,8 +52,8 @@ of reserved characters so you must take care of that by yourself. This is why
     
 ## quick reference
 
-Full reference can be found in API reference documentation but here is a short
-reference.
+Full reference can be found in [API reference documentation page](http://solrq.readthedocs.org/en/latest/api-reference.html) 
+but here is a short reference.
 
 ### boosting queries
 
