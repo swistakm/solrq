@@ -1,12 +1,18 @@
+sudo: false
 language: python
+
+# note: this will make python3.5 available during testing because it is
+#       not available by defaut at the time of this writing
+python:
+  - 3.5
 
 install: pip install tox --use-mirrors
 env:
   - TOX_ENV=py26
   - TOX_ENV=py27
-  - TOX_ENV=py32
   - TOX_ENV=py33
   - TOX_ENV=py34
+  - TOX_ENV=py35
   - TOX_ENV=pypy
   - TOX_ENV=pypy3
   - TOX_ENV=pep8

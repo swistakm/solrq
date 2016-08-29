@@ -5,9 +5,10 @@
 # solrq
 `solrq` is a Python Solr query utility. It helps making query strings for Solr
 and also helps with escaping reserved characters. `solrq` is has no external
-dependencies and is compatibile with `python2.6`, `python2.7`, `python3.2`,
-`python3.3`, `python3.4`, `pypy` and `pypy3` . It might be compatibile with
-other python releases/implentations but this has not been tested yet.
+dependencies and is compatibile with `python2.6`, `python2.7`,
+`python3.3`, `python3.4`, `python3.5`, `pypy` and `pypy3`.
+It might be compatibile with other python releases/implentations but this has
+not been tested yet or is no longer tested (e.g `python3.2`).
 
     pip install solrq
     
@@ -139,7 +140,7 @@ Simply as:
 ```python
 >>> from datetime import datetime, timedelta
 >>> Q(date=datetime(1970, 1, 1))
-<Q: date:"1970-01-01T00:00:00">
+<Q: date:"1970-01-01T00:00:00Z">
 >>> # note that timedeltas has any sense mostly with ranges
 >>> Q(delta=timedelta(days=1))
 <Q: delta:NOW+1DAYS+0SECONDS+0MILLISECONDS>
