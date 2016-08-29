@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 from datetime import datetime, timedelta
+import pytz
 
 from solrq import (
     Q, QOperator, Value, Range, Proximity, ANY, SET
@@ -102,9 +103,18 @@ def test_value():
     assert str(Value('"foo bar"', safe=True), ) == '"foo bar"'
 
 
-def test_value_datetimes():
+def test_value_nonlocalized_datetimes():
     dt = datetime.now()
-    assert str(Value(dt)) == '"{dt}"'.format(dt=dt.isoformat())
+    assert str(Value(dt)) == '"{dt}Z"'.format(dt=dt.isoformat())
+
+
+def test_value_localized_datetimes():
+    dt = datetime.now()
+    dt = dt.replace(tzinfo=pytz.timezone('Europe/Warsaw'))
+
+    assert str(Value(dt)) == '"{dt}Z"'.format(
+        dt=dt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+    )
 
 
 def test_value_timedelta():
