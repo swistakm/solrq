@@ -65,7 +65,10 @@ class Value(object):
         if isinstance(raw, datetime) and not safe:
             # Note: solr speaks ISO, wrap it with quotes to avoid further
             # escaping
-            self.raw = '"{dt}"'.format(dt=raw.isoformat())
+            self.raw = '"{dt}Z"'.format(
+                dt=(raw.strftime('%Y-%m-%dT%H:%M:%S.%f') if raw.tzinfo
+                    else raw.isoformat())
+            )
             # since we translated value we can safely mark it safe
             self.safe = True
         elif isinstance(raw, timedelta) and not safe:
