@@ -16,6 +16,7 @@ env:
   - TOX_ENV=pypy
   - TOX_ENV=pypy3
   - TOX_ENV=pep8
+  - TOX_ENV=pep257
   - TOX_ENV=coverage
 
 script:
