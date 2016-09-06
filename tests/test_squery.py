@@ -158,6 +158,29 @@ def test_range():
     ) == "[{from_} TO {to}]".format(from_=td_from, to=td_to)
 
 
+def test_range_boundaries_unsupported():
+    with pytest.raises(ValueError):
+        Range(1, 2, boundaries='<>')
+
+    with pytest.raises(ValueError):
+        Range(1, 2, boundaries='anything')
+
+
+def test_range_boundaries():
+    assert str(Range(0, 1, boundaries='inclusive')) == '[0 TO 1]'
+    assert str(Range(0, 1, boundaries='exclusive')) == '{0 TO 1}'
+
+    assert str(Range(0, 1, boundaries='ee')) == '{0 TO 1}'
+    assert str(Range(0, 1, boundaries='ii')) == '[0 TO 1]'
+    assert str(Range(0, 1, boundaries='ei')) == '{0 TO 1]'
+    assert str(Range(0, 1, boundaries='ie')) == '[0 TO 1}'
+
+    assert str(Range(0, 1, boundaries='{}')) == '{0 TO 1}'
+    assert str(Range(0, 1, boundaries='[]')) == '[0 TO 1]'
+    assert str(Range(0, 1, boundaries='{]')) == '{0 TO 1]'
+    assert str(Range(0, 1, boundaries='[}')) == '[0 TO 1}'
+
+
 def test_special():
     assert str(SET) == '[* TO *]'
     assert str(ANY) == '*'
