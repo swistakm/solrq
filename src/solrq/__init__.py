@@ -116,14 +116,25 @@ class Value(object):
 class Range(Value):
     """Wrapper around range values.
 
-     Wraps two values with Solr's ``[<from> TO <to>]`` syntax with respect to
-     restricted character esaping.
+    Wraps two values with Solr's ``[<from> TO <to>]`` syntax (defaults to
+    inclusive boundaries) with respect to restricted character escaping.
+
+     Wraps two values with Solr's ``[<from> TO <to>]`` (defaults to inclusive
+     boundaries) syntax with respect to restricted character escaping.
 
     Args:
         from_ (object): start of range, same as parameter ``raw`` in
             :class:`Value`.
         to (object): end of range, same as parameter ``raw`` in :class:`Value`.
+        boundaries (str): type of boundaries for the range. Defaults to
+            ``'inclusive'``. Allowed values are:
 
+            * ``inclusive``, ``ii``, or ``[]``: translates to
+                ``[<from> TO <to>]``
+            * ``exclusive``, ``ee``, or ``{}``: translates to
+                ``{<from> TO <to>}``
+            * ``ei``, or ``{]``: translates to ``{<from> TO <to>]``
+            * ``ie``, or ``[}``: translates to ``[<from> TO <to>}``
 
     Examples:
 
@@ -146,6 +157,15 @@ class Range(Value):
             >>> Range(timedelta(days=2), timedelta())
             <Range: [NOW+2DAYS+0SECONDS+0MILLISECONDS TO NOW]>
 
+        To use exclusive or mixed boundaries use ``boundaries`` argument:
+
+            >>> Range(0, 20, boundaries='exclusive')
+            <Range: {0 TO 20}>
+            >>> Range(0, 20, boundaries='ei')
+            <Range: {0 TO 20]>
+            >>> Range(0, 20, boundaries='[}')
+            <Range: [0 TO 20}>
+
     Note:
         We could treat any iterables always as ranges when initializing
         :class:`Q` objects but "explicit is better than implicit" and also
@@ -153,8 +173,30 @@ class Range(Value):
         want to do that.
     """
 
-    def __init__(self, from_, to, safe=None):
-        """Initialize range value."""
+    BOUNDARY_BRACKETS = {
+        'exclusive': '{}',
+        'inclusive': '[]',
+        'ee': '{}',
+        'ei': '{]',
+        'ii': '[]',
+        'ie': '[}'
+    }
+    # DRY
+    BOUNDARY_BRACKETS.update(
+        # compat: py26 does not support dict comprehensions
+        dict((value, value) for value in BOUNDARY_BRACKETS.values())
+    )
+
+    def __init__(self, from_, to, safe=None, boundaries='inclusive'):
+        """Initialize range value and set boundary brackets."""
+        try:
+            brackets = self.BOUNDARY_BRACKETS[boundaries]
+        except KeyError:
+            raise ValueError(
+                "boundaries value must be one of {}"
+                "".format(self.BOUNDARY_BRACKETS.keys())
+            )
+
         self.from_ = (
             from_ if isinstance(from_, Value) else Value(from_, safe or False)
         )
@@ -168,7 +210,8 @@ class Range(Value):
             self.to.safe = safe
 
         super(Range, self).__init__(
-            "[{from_} TO {to}]".format(from_=self.from_, to=self.to),
+            "{brackets[0]}{from_} TO {to}{brackets[1]}"
+            "".format(from_=self.from_, to=self.to, brackets=brackets),
             # Note: parts will be safe'd or not so no need for further escaping
             True
         )
