@@ -116,9 +116,8 @@ class Value(object):
 class Range(Value):
     """Wrapper around range values.
 
-    Wrapper around range values. Wraps two values with Solr's
-    ``[<from> TO <to>]`` (defaults to inclusive boundaries) syntax with respect
-    to restricted character escaping.
+    Wraps two values with Solr's ``[<from> TO <to>]`` syntax (defaults to
+    inclusive boundaries) with respect to restricted character escaping.
 
      Wraps two values with Solr's ``[<from> TO <to>]`` (defaults to inclusive
      boundaries) syntax with respect to restricted character escaping.
