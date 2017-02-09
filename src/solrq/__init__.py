@@ -54,7 +54,7 @@ class Value(object):
     """
 
     # note: since we escape spaces there is no need to escape AND, OR, NOT
-    ESCAPE_RE = re.compile(r'(?<!\\)(?P<char>[ &|+\-!(){}[\]*^"~?:])')
+    ESCAPE_RE = re.compile(r'(?<!\\)(?P<char>[ &|+\\\-!(){}[\]*^"~?:])')
     TIMEDELTA_FORMAT = "NOW{days:+d}DAYS{secs:+d}SECONDS{mills:+d}MILLISECONDS"
 
     def __init__(self, raw, safe=False):

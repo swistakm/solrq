@@ -192,17 +192,14 @@ def test_proximity():
     # ... but not if marked as safe
     assert str(Proximity("foo bar", 12, safe=True)) == '"foo bar"~12'
 
-    # note: boosting an explicit value has same result as raw string
-    assert str(
-        Proximity(Value("foo bar"), 12)
-    ) == str(
-        Proximity(Value("foo bar", safe=True), 12)
-    ) == '"foo\\ bar"~12'
-
     # note: only marking safe on all stages ensures it will not be escaped
     assert str(
         Proximity(Value("foo bar", safe=True), 12, safe=True)
     ) == '"foo bar"~12'
+
+
+def test_can_escape_special_characters():
+    assert str(Q(foo="\\")) == "foo:\\\\"
 
 
 def test_reprs():
