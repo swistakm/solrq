@@ -18,6 +18,7 @@ env:
   - TOX_ENV=pep8
   - TOX_ENV=pep257
   - TOX_ENV=coverage
+  - TOX_ENV=flake8
 
 script:
   - tox -e $TOX_ENV
