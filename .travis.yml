@@ -21,8 +21,6 @@ env:
   - TOX_ENV=flake8
 
 script:
-  # note: pip>9.0 does not support current pypy3
-  - pip install -U 'pip<9.0'
   - tox -e $TOX_ENV
 
 notifications:
