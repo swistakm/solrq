@@ -1,4 +1,2 @@
-# note: pip>9.0 does not support current pypy3
-pip<9.0
 pytest
 pytz
