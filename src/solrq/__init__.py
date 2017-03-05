@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-VERSION = (1, 1, 0)  # PEP 386  # noqa
+VERSION = (1, 1, 1)  # PEP 386  # noqa
 __version__ = ".".join([str(x) for x in VERSION])  # noqa
 
 import re
