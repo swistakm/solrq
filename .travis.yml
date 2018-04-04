@@ -13,7 +13,8 @@ env:
   - TOX_ENV=py33
   - TOX_ENV=py34
   - TOX_ENV=py35
-  - TOX_ENV=pypy
+  # reenable when pypy support in tox will be fixed
+  #- TOX_ENV=pypy
   # reenable when pypy3 support in tox will be fixed
   #- TOX_ENV=pypy3
   - TOX_ENV=pep8
