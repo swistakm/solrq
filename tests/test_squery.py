@@ -63,6 +63,26 @@ def test_query_boost():
     assert str(query) == query.compile() == "((a:b AND c:d)^1) OR (e:f^2)"
 
 
+def test_constant_score():
+    query = Q(foo="bar").constant_score(2)
+    assert str(query) == query.compile() == "foo:bar^=2"
+
+    query = Q(foo="bar").constant_score(2.0)
+    assert str(query) == query.compile() == "foo:bar^=2.0"
+
+    # using bools with constant score
+    query = Q(foo="bar").constant_score(3) | Q(bar="baz").constant_score(4)
+    assert str(query) == query.compile() == "(foo:bar^=3) OR (bar:baz^=4)"
+
+    # constant score on logical expression
+    query = (Q(foo="bar") | Q(bar="baz")).constant_score(3)
+    assert str(query) == query.compile() == "(foo:bar OR bar:baz)^=3"
+
+    # more complicated example, note: extra parenthesis will be added
+    query = (Q(a="b") & Q(c="d")).constant_score(1) | Q(e="f").constant_score(2)  # noqa
+    assert str(query) == query.compile() == "((a:b AND c:d)^=1) OR (e:f^=2)"
+
+
 def test_query_not_simple():
     query = ~Q(foo="bar")
     assert str(query) == query.compile() == "!foo:bar"
@@ -94,6 +114,14 @@ def test_operator_invalid_boost_call():
 
     with pytest.raises(TypeError):
         QOperator.boost([Q()], object())
+
+
+def test_operator_invalid_constant_score_call():
+    with pytest.raises(ValueError):
+        QOperator.constant_score([Q(), Q()], 1)
+
+    with pytest.raises(TypeError):
+        QOperator.constant_score([Q()], object())
 
 
 def test_value():
