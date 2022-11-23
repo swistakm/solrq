@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-VERSION = (1, 1, 1)  # PEP 386  # noqa
+VERSION = (1, 1, 2)  # PEP 386  # noqa
 __version__ = ".".join([str(x) for x in VERSION])  # noqa
 
 import re  # noqa: E402
@@ -75,7 +75,7 @@ class Value(object):
         elif isinstance(raw, timedelta) and not safe:
             # Make representation compatibile with Solr Date Math Syntax
             # Note: at first look this can look weird since it can produce
-            # strings with mixed singn for negative deltas e.g:
+            # strings with mixed sign for negative deltas e.g:
             #
             #     >>> Value(-timedelta(days=2, hours=2))
             #     <Value: NOW-3DAYS+79200SECONDS+0MILLISECONDS>

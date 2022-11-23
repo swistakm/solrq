@@ -174,4 +174,3 @@ Tests are run using tox. Simply install it and run:
     tox
     
 And that's all.
-
