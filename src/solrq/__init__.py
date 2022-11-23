@@ -2,9 +2,9 @@
 VERSION = (1, 1, 1)  # PEP 386  # noqa
 __version__ = ".".join([str(x) for x in VERSION])  # noqa
 
-import re
-from datetime import datetime, timedelta
-from functools import partial
+import re  # noqa: E402
+from datetime import datetime, timedelta  # noqa: E402
+from functools import partial  # noqa: E402
 
 
 class Value(object):
