@@ -337,6 +337,38 @@ class QOperator(object):
 
         return "{qs}^{factor}".format(qs=qs_list[0], factor=factor)
 
+    @classmethod
+    def constant_score(cls, qs_list, score):
+        """Perform constant score operator routine.
+
+        Args:
+            qs_list (iterable): single element list with compiled query string
+            score (float or int): constant score value
+
+        Returns:
+            str: compiled query string followed with '^=' and score value.
+
+        Note:
+            this operator routine is not intended to be directly used as
+            :class:`Q` object argument but rather as a component for actual
+            operator e.g:
+
+                >>> from functools import partial
+                >>> Q(children=[Q(a='b')], op=partial(QOperator.constant_score, score=2))
+                <Q: a:b^=2>
+        """  # noqa
+        if len(qs_list) != 1:
+            raise ValueError(
+                "<constant_score> operator can receive only single Q object"
+            )
+
+        if not isinstance(score, (int, float)):
+            raise TypeError(
+                "score must be either int or float"
+            )
+
+        return "{qs}^={score}".format(qs=qs_list[0], score=score)
+
 
 class Q(object):
     """Class for handling Solr queries in a semantic way.
@@ -481,6 +513,28 @@ class Q(object):
         return Q(
             children=[self],
             op=partial(QOperator.boost, factor=other)
+        )
+
+    def constant_score(self, other):
+        """Build complex query using Solr constant score operator.
+
+        Args:
+            other (float or int): constant score value.
+
+        Returns:
+            Q: object representing Solr query with assinged constant score.
+
+        Examples:
+
+            >>> Q(type="animal").constant_score(2)
+            <Q: type:animal^=2>
+            >>> (Q(type="animal") | Q(name="cat")).constant_score(1.0)
+            <Q: (type:animal OR name:cat)^=1.0>
+
+        """
+        return Q(
+            children=[self],
+            op=partial(QOperator.constant_score, score=other)
         )
 
     def compile(self, extra_parenthesis=False):
