@@ -98,7 +98,7 @@ def test_operator_invalid_boost_call():
 
 def test_value():
     assert str(Value('foo bar')) == 'foo\\ bar'
-    assert str(Value('"foo bar"')) == '\\"foo\ bar\\"'
+    assert str(Value('"foo bar"')) == '\\"foo\\ bar\\"'
     # note: this is how we wrap with quotes
     assert str(Value('"foo bar"', safe=True), ) == '"foo bar"'
 
