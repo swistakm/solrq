@@ -5,10 +5,9 @@
 # solrq
 `solrq` is a Python Solr query utility. It helps making query strings for Solr
 and also helps with escaping reserved characters. `solrq` is has no external
-dependencies and is compatibile with `python2.6`, `python2.7`,
-`python3.3`, `python3.4`, `python3.5`, `pypy` and `pypy3`.
+dependencies and is compatibile with `python3.7`, `python3,8`, `python3.9`, `python3.10`, `python3.11`, `pypy` and `pypy3`.
 It might be compatibile with other python releases/implentations but this has
-not been tested yet or is no longer tested (e.g `python3.2`).
+not been tested yet or is no longer tested (e.g `python3.2` or `python2.7`).
 
     pip install solrq
     
